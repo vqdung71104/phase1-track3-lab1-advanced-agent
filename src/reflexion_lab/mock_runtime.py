@@ -5,8 +5,14 @@ from .utils import normalize_answer
 FIRST_ATTEMPT_WRONG = {"hp2": "London", "hp4": "Atlantic Ocean", "hp6": "Red Sea", "hp8": "Andes"}
 FAILURE_MODE_BY_QID = {"hp2": "incomplete_multi_hop", "hp4": "wrong_final_answer", "hp6": "entity_drift", "hp8": "entity_drift"}
 
-def planner(example: QAExample) -> str:
-    return "Step 1: Identify the main entity. Step 2: Extract the specific attribute requested."
+def planner(example: QAExample) -> list[str]:
+    return [
+        "Plan A: Step 1: Identify the main entity. Step 2: Extract the specific attribute requested.",
+        "Plan B: Step 1: Find main entity. Step 2: Verify entity. Step 3: Extract attribute."
+    ]
+
+def plan_evaluator(plan: str) -> int:
+    return 10 if "verify" in plan.lower() else 5
 
 def actor_answer(example: QAExample, attempt_id: int, agent_type: str, reflection_memory: list[str], plan: str = "") -> str:
     if example.qid not in FIRST_ATTEMPT_WRONG:

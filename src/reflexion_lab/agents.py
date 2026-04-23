@@ -1,7 +1,7 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Literal
-from .mock_runtime import FAILURE_MODE_BY_QID, actor_answer, evaluator, reflector, planner
+from .mock_runtime import FAILURE_MODE_BY_QID, actor_answer, evaluator, reflector, planner, plan_evaluator
 from .schemas import AttemptTrace, QAExample, ReflectionEntry, RunRecord
 
 @dataclass
@@ -24,14 +24,25 @@ class BaseAgent:
         current_max_attempts = self.max_attempts
         attempt_id = 1
         while attempt_id <= current_max_attempts:
-            plan = planner(example)
+            candidate_plans = planner(example)
+            best_plan = ""
+            best_score = -1
+            for p in candidate_plans:
+                score = plan_evaluator(p)
+                if score > best_score:
+                    best_score = score
+                    best_plan = p
+            plan = best_plan
+            
             answer = actor_answer(example, attempt_id, self.agent_type, self.reflection_memory, plan)
             judge = evaluator(example, answer)
             # TODO: Replace with actual token count from LLM response
-            token_estimate = 320 + (attempt_id * 65) + (120 if self.agent_type == "reflexion" else 0) + 50
+            extra_plan_tokens = len(candidate_plans) * 50
+            token_estimate = 320 + (attempt_id * 65) + (120 if self.agent_type == "reflexion" else 0) + extra_plan_tokens
             # TODO: Replace with actual latency measurement
-            latency_ms = 160 + (attempt_id * 40) + (90 if self.agent_type == "reflexion" else 0) + 100
-            trace = AttemptTrace(attempt_id=attempt_id, answer=answer, score=judge.score, reason=judge.reason, token_estimate=token_estimate, latency_ms=latency_ms, plan=plan)
+            extra_plan_latency = len(candidate_plans) * 100
+            latency_ms = 160 + (attempt_id * 40) + (90 if self.agent_type == "reflexion" else 0) + extra_plan_latency
+            trace = AttemptTrace(attempt_id=attempt_id, answer=answer, score=judge.score, reason=judge.reason, token_estimate=token_estimate, latency_ms=latency_ms, plan=plan, candidate_plans=candidate_plans)
             final_answer = answer
             final_score = judge.score
             if judge.score == 1:

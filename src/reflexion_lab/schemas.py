@@ -32,6 +32,7 @@ class AttemptTrace(BaseModel):
     reason: str
     reflection: Optional[ReflectionEntry] = None
     plan: Optional[str] = None
+    candidate_plans: list[str] = Field(default_factory=list)
     token_estimate: int = 0
     latency_ms: int = 0
 
