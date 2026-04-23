@@ -9,6 +9,13 @@ class BaseAgent:
     agent_type: Literal["react", "reflexion"]
     max_attempts: int = 1
     reflection_memory: list[str] = field(default_factory=list)
+    memory_limit: int = 3
+
+    def compress_memory(self):
+        if len(self.reflection_memory) > self.memory_limit:
+            summarized = "Summarized past lessons: Always complete multi-hop reasoning and verify entities."
+            self.reflection_memory = [summarized] + self.reflection_memory[-(self.memory_limit - 1):]
+
     def run(self, example: QAExample) -> RunRecord:
         reflections: list[ReflectionEntry] = []
         traces: list[AttemptTrace] = []
@@ -35,6 +42,7 @@ class BaseAgent:
                 reflection = reflector(example, attempt_id, judge)
                 reflections.append(reflection)
                 self.reflection_memory.append(f"Lesson: {reflection.lesson}\nStrategy: {reflection.next_strategy}")
+                self.compress_memory()
                 trace.reflection = reflection
             traces.append(trace)
         total_tokens = sum(t.token_estimate for t in traces)
