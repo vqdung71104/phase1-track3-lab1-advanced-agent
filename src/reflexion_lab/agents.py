@@ -21,7 +21,9 @@ class BaseAgent:
         traces: list[AttemptTrace] = []
         final_answer = ""
         final_score = 0
-        for attempt_id in range(1, self.max_attempts + 1):
+        current_max_attempts = self.max_attempts
+        attempt_id = 1
+        while attempt_id <= current_max_attempts:
             answer = actor_answer(example, attempt_id, self.agent_type, self.reflection_memory)
             judge = evaluator(example, answer)
             # TODO: Replace with actual token count from LLM response
@@ -35,16 +37,18 @@ class BaseAgent:
                 traces.append(trace)
                 break
             
-            # 1. Kiểm tra nếu agent_type là 'reflexion' và chưa hết số lần attempt
-            # 2. Gọi hàm reflector để lấy nội dung reflection
-            # 3. Cập nhật reflection_memory để Actor dùng cho lần sau
-            if self.agent_type == "reflexion" and attempt_id < self.max_attempts:
+            if self.agent_type == "reflexion" and attempt_id == current_max_attempts:
+                if example.difficulty == "hard" and current_max_attempts < 5:
+                    current_max_attempts += 2
+
+            if self.agent_type == "reflexion" and attempt_id < current_max_attempts:
                 reflection = reflector(example, attempt_id, judge)
                 reflections.append(reflection)
                 self.reflection_memory.append(f"Lesson: {reflection.lesson}\nStrategy: {reflection.next_strategy}")
                 self.compress_memory()
                 trace.reflection = reflection
             traces.append(trace)
+            attempt_id += 1
         total_tokens = sum(t.token_estimate for t in traces)
         total_latency = sum(t.latency_ms for t in traces)
         failure_mode = "none" if final_score == 1 else FAILURE_MODE_BY_QID.get(example.qid, "wrong_final_answer")
