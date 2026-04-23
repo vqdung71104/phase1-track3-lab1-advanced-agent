@@ -11,6 +11,7 @@ app = typer.Typer(add_completion=False)
 @app.command()
 def main(dataset: str = "data/hotpot_mini.json", out_dir: str = "outputs/sample_run", reflexion_attempts: int = 3) -> None:
     examples = load_dataset(dataset)
+    examples = examples * 10
     react = ReActAgent()
     reflexion = ReflexionAgent(max_attempts=reflexion_attempts)
     react_records = [react.run(example) for example in examples]
