@@ -1,0 +1,18 @@
+[
+    {
+    "qid": "hp107",
+    "difficulty": "hard",
+    "question": "Which mountain range contains the highest mountain in the country whose capital is Kathmandu?",
+    "gold_answer": "Himalayas",
+    "context": [
+      {
+        "title": "Kathmandu",
+        "text": "Kathmandu is the capital city of Nepal."
+      },
+      {
+        "title": "Nepal",
+        "text": "Mount Everest, the highest mountain in Nepal, is part of the Himalayas."
+      }
+    ]
+  }
+]

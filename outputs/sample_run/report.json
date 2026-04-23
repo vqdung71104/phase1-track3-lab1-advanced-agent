@@ -1,0 +1,69 @@
+{
+  "meta": {
+    "dataset": "hotpot_mini1.json",
+    "mode": "mock",
+    "num_records": 2,
+    "agents": [
+      "react",
+      "reflexion"
+    ]
+  },
+  "summary": {
+    "react": {
+      "count": 1,
+      "em": 1.0,
+      "avg_attempts": 1,
+      "avg_token_estimate": 763,
+      "avg_latency_ms": 9326
+    },
+    "reflexion": {
+      "count": 1,
+      "em": 1.0,
+      "avg_attempts": 1,
+      "avg_token_estimate": 758,
+      "avg_latency_ms": 16830
+    },
+    "delta_reflexion_minus_react": {
+      "em_abs": 0.0,
+      "attempts_abs": 0,
+      "tokens_abs": -5,
+      "latency_abs": 7504
+    }
+  },
+  "failure_modes": {
+    "none": 2
+  },
+  "examples": [
+    {
+      "qid": "hp107",
+      "agent_type": "react",
+      "gold_answer": "Himalayas",
+      "predicted_answer": "The highest mountain in Nepal, whose capital is Kathmandu, is part of the Himalayas.",
+      "is_correct": true,
+      "attempts": 1,
+      "failure_mode": "none",
+      "reflection_count": 0
+    },
+    {
+      "qid": "hp107",
+      "agent_type": "reflexion",
+      "gold_answer": "Himalayas",
+      "predicted_answer": "The highest mountain in the country whose capital is Kathmandu (Nepal) is Mount Everest, which is part of the Himalayas.",
+      "is_correct": true,
+      "attempts": 1,
+      "failure_mode": "none",
+      "reflection_count": 0
+    }
+  ],
+  "extensions": [
+    "structured_evaluator",
+    "reflection_memory",
+    "memory_compression",
+    "adaptive_max_attempts",
+    "plan_then_execute",
+    "mini_lats_branching",
+    "benchmark_report_json",
+    "mock_mode_for_autograding"
+  ],
+  "discussion": "Reflexion helps when the first attempt stops after the first hop or drifts to a wrong second-hop entity. The tradeoff is higher attempts, token cost, and latency. In a real report, students should explain when the reflection memory was useful, which failure modes remained, and whether evaluator quality limited gains."
+}
