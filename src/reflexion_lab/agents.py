@@ -1,7 +1,7 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Literal
-from .mock_runtime import FAILURE_MODE_BY_QID, actor_answer, evaluator, reflector
+from .mock_runtime import FAILURE_MODE_BY_QID, actor_answer, evaluator, reflector, planner
 from .schemas import AttemptTrace, QAExample, ReflectionEntry, RunRecord
 
 @dataclass
@@ -24,13 +24,14 @@ class BaseAgent:
         current_max_attempts = self.max_attempts
         attempt_id = 1
         while attempt_id <= current_max_attempts:
-            answer = actor_answer(example, attempt_id, self.agent_type, self.reflection_memory)
+            plan = planner(example)
+            answer = actor_answer(example, attempt_id, self.agent_type, self.reflection_memory, plan)
             judge = evaluator(example, answer)
             # TODO: Replace with actual token count from LLM response
-            token_estimate = 320 + (attempt_id * 65) + (120 if self.agent_type == "reflexion" else 0)
+            token_estimate = 320 + (attempt_id * 65) + (120 if self.agent_type == "reflexion" else 0) + 50
             # TODO: Replace with actual latency measurement
-            latency_ms = 160 + (attempt_id * 40) + (90 if self.agent_type == "reflexion" else 0)
-            trace = AttemptTrace(attempt_id=attempt_id, answer=answer, score=judge.score, reason=judge.reason, token_estimate=token_estimate, latency_ms=latency_ms)
+            latency_ms = 160 + (attempt_id * 40) + (90 if self.agent_type == "reflexion" else 0) + 100
+            trace = AttemptTrace(attempt_id=attempt_id, answer=answer, score=judge.score, reason=judge.reason, token_estimate=token_estimate, latency_ms=latency_ms, plan=plan)
             final_answer = answer
             final_score = judge.score
             if judge.score == 1:

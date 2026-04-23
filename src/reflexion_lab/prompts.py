@@ -12,3 +12,7 @@ You are an evaluator. Compare the predicted answer against the gold answer. Retu
 REFLECTOR_SYSTEM = """
 You are a reflector agent. Analyze the failed attempt and the evaluator's feedback. Extract a 'lesson' learned and a 'next_strategy' to avoid the same mistake in the next attempt. Focus on why the previous answer was wrong based on the context.
 """
+
+PLANNER_SYSTEM = """
+You are a planner agent. Break down the user's complex question into a step-by-step reasoning plan. Do not answer the question directly, just outline the steps needed to find the answer.
+"""

@@ -31,6 +31,7 @@ class AttemptTrace(BaseModel):
     score: int
     reason: str
     reflection: Optional[ReflectionEntry] = None
+    plan: Optional[str] = None
     token_estimate: int = 0
     latency_ms: int = 0
 
